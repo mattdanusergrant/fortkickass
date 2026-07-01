@@ -3,6 +3,7 @@
 #include "FortKickassGameMode.h"
 #include "FortKickassCharacter.h"
 #include "FortPlayerState.h"
+#include "FortGameState.h"
 #include "UObject/ConstructorHelpers.h"
 
 AFortKickassGameMode::AFortKickassGameMode()
@@ -16,4 +17,7 @@ AFortKickassGameMode::AFortKickassGameMode()
 
 	// Use our PlayerState so each player carries a replicated resource count.
 	PlayerStateClass = AFortPlayerState::StaticClass();
+
+	// Use our GameState so the whole session shares one replicated day/night clock.
+	GameStateClass = AFortGameState::StaticClass();
 }
