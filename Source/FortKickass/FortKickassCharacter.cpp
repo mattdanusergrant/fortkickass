@@ -1,7 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FortKickassCharacter.h"
+#include "Buildable.h"
 #include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -89,6 +91,28 @@ void AFortKickassCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+
+	// Legacy key bind for building — works alongside Enhanced Input, no Input Action asset needed. Press B.
+	PlayerInputComponent->BindKey(EKeys::B, IE_Pressed, this, &AFortKickassCharacter::OnBuildPressed);
+}
+
+void AFortKickassCharacter::OnBuildPressed()
+{
+	// Runs on the controlling client. Place the block a bit in front of and above the character.
+	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 150.f + FVector(0.f, 0.f, 50.f);
+	const FRotator SpawnRotation = GetActorRotation();
+
+	// Ask the server to actually spawn it. On a listen-server host this just runs locally.
+	ServerPlaceBuildable(SpawnLocation, SpawnRotation);
+}
+
+void AFortKickassCharacter::ServerPlaceBuildable_Implementation(FVector Location, FRotator Rotation)
+{
+	// Server authority: spawn the replicated block so every client sees it.
+	if (UWorld* World = GetWorld())
+	{
+		World->SpawnActor<ABuildable>(ABuildable::StaticClass(), Location, Rotation);
 	}
 }
 

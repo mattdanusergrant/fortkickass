@@ -55,7 +55,14 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+	/** Local: build key pressed. Asks the server to place a block in front of the character. */
+	void OnBuildPressed();
+
+	/** Server RPC: the server spawns a replicated Buildable at the requested transform. */
+	UFUNCTION(Server, Reliable)
+	void ServerPlaceBuildable(FVector Location, FRotator Rotation);
+
 
 protected:
 
