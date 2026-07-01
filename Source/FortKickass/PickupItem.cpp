@@ -1,0 +1,50 @@
+// Fort Kickass — server-authoritative pickup. See PickupItem.h for the why.
+
+#include "PickupItem.h"
+
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/Pawn.h"
+
+APickupItem::APickupItem()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	// Replicated so the server's Destroy() removes the item on every client too.
+	bReplicates = true;
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	SetRootComponent(Mesh);
+	Mesh->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+
+	CollectTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CollectTrigger"));
+	CollectTrigger->SetupAttachment(Mesh);
+	CollectTrigger->SetSphereRadius(96.f);
+	CollectTrigger->SetCollisionProfileName(TEXT("Trigger"));
+}
+
+void APickupItem::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CollectTrigger->OnComponentBeginOverlap.AddDynamic(this, &APickupItem::OnCollectOverlap);
+}
+
+void APickupItem::OnCollectOverlap(UPrimitiveComponent* /*OverlappedComp*/, AActor* OtherActor,
+	UPrimitiveComponent* /*OtherComp*/, int32 /*OtherBodyIndex*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/)
+{
+	// Overlap fires on every machine, but only the server owns the world state.
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (!Cast<APawn>(OtherActor))
+	{
+		return;
+	}
+
+	// Destroying a replicated actor on the server removes it for all connected clients.
+	// (Next step: credit the collecting player's resource count on their PlayerState.)
+	Destroy();
+}
