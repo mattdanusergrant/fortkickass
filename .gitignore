@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# Fort Kick Ass — Unreal Engine 5 .gitignore
+# Based on Epic's official Unreal .gitignore. Commit .uproject, Config/,
+# Source/, Content/, Plugins/ — never the generated folders below.
+# ---------------------------------------------------------------------------
+
+# Unreal generated / build artifacts
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio / Rider IDE files (regenerated from the .uproject)
+.vs/
+.vsconfig
+.idea/
+*.VC.db
+*.VC.opendb
+*.opensdf
+*.opendb
+*.sdf
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+
+# Compiled source
+*.o
+*.obj
+*.pdb
+*.dll
+*.exe
+*.lib
+*.a
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Keep: *.uproject, Config/, Content/, Source/, Plugins/
