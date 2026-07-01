@@ -4,10 +4,24 @@ A third-person, co-op **shared world** built in Unreal Engine 5 — a place a fe
 to mess around in and slowly make their own. Built to be played with friends *and* to learn Unreal
 deeply enough to support a games career (networking front-loaded on purpose).
 
-> **Status:** Pre-production. Repo seeded with source-control foundation; Unreal project not yet
-> generated (that step happens on a PC with the Editor — see Setup below).
+> **Status:** Playable prototype. M0 hit (two players in a world, a replicated interaction) plus a
+> first survival slice — gather, build, and a shared day/night clock, all server-authoritative. See
+> [`DEVLOG.md`](DEVLOG.md) for the build narrative.
 
 ---
+
+## What works so far
+
+All server-authoritative and verified across two clients on a listen server:
+
+| System | Class | Networking concept |
+|---|---|---|
+| Interactable door | `AInteractableDoor` | replicated variable + `RepNotify` + `HasAuthority()` |
+| Resource pickup | `APickupItem` | replicated actor destroy, server authority |
+| Per-player resource count | `AFortPlayerState` | `PlayerState` (replicated per-player data) |
+| Place-a-block building | `ABuildable` + Character Server RPC | Server RPC (client asks → server spawns → replicates) |
+| Shared day/night clock | `AFortGameState` | `GameState` (replicated shared state) |
+| Host / join by IP | `UFortNetworkLibrary` | `ServerTravel` / `ClientTravel` |
 
 ## What this repo is
 
@@ -16,14 +30,14 @@ learning docs live separately** in the Conductive vault at
 `07_projects/unreal-multiplayer-game/` (README, LEARNING-ROADMAP, ARCHITECTURE, SETUP, design/).
 Read those for the full vision and the milestone-by-milestone roadmap.
 
-## The v0.1 goal (Milestone M0)
+## The v0.1 goal (Milestone M0) — ✅ hit
 
 > **"We can stand in a world together."**
 > Two players join the same session (one hosts a listen server, one joins), both run/jump around a
 > small level and see each other move smoothly, and one basic interaction replicates (e.g. one player
 > opens a door, the other sees it open).
 
-Everything else builds on that proven foundation. See the vault's `README.md` for scope discipline.
+Proven with the replicated door across two clients. Everything since builds on that foundation.
 
 ## Locked v1 decisions
 
