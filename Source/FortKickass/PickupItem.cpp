@@ -4,6 +4,7 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "FortPlayerState.h"
 #include "GameFramework/Pawn.h"
 
 APickupItem::APickupItem()
@@ -39,12 +40,18 @@ void APickupItem::OnCollectOverlap(UPrimitiveComponent* /*OverlappedComp*/, AAct
 		return;
 	}
 
-	if (!Cast<APawn>(OtherActor))
+	APawn* Pawn = Cast<APawn>(OtherActor);
+	if (!Pawn)
 	{
 		return;
 	}
 
+	// Credit the collecting player. AddResource is server-guarded and replicates the new count.
+	if (AFortPlayerState* PS = Pawn->GetPlayerState<AFortPlayerState>())
+	{
+		PS->AddResource(1);
+	}
+
 	// Destroying a replicated actor on the server removes it for all connected clients.
-	// (Next step: credit the collecting player's resource count on their PlayerState.)
 	Destroy();
 }

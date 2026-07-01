@@ -2,6 +2,7 @@
 
 #include "FortKickassGameMode.h"
 #include "FortKickassCharacter.h"
+#include "FortPlayerState.h"
 #include "UObject/ConstructorHelpers.h"
 
 AFortKickassGameMode::AFortKickassGameMode()
@@ -12,4 +13,7 @@ AFortKickassGameMode::AFortKickassGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	// Use our PlayerState so each player carries a replicated resource count.
+	PlayerStateClass = AFortPlayerState::StaticClass();
 }
