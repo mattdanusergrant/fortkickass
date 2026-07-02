@@ -100,15 +100,12 @@ void AFortKickassCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void AFortKickassCharacter::OnBuildPressed()
 {
-	// Runs on the controlling client. Place the block a bit in front of and above the character.
-	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 150.f + FVector(0.f, 0.f, 50.f);
-	const FRotator SpawnRotation = GetActorRotation();
-
-	// Ask the server to actually spawn it. On a listen-server host this just runs locally.
-	ServerPlaceBuildable(SpawnLocation, SpawnRotation);
+	// Runs on the controlling client. Just request the build — the server decides where
+	// (from its own authoritative copy of this character) and whether we can afford it.
+	ServerPlaceBuildable();
 }
 
-void AFortKickassCharacter::ServerPlaceBuildable_Implementation(FVector Location, FRotator Rotation)
+void AFortKickassCharacter::ServerPlaceBuildable_Implementation()
 {
 	// Server authority: charge the build cost first, and only spawn if the player can afford it.
 	// The server owns the resource count, so a client can't build for free by faking the RPC.
@@ -118,9 +115,14 @@ void AFortKickassCharacter::ServerPlaceBuildable_Implementation(FVector Location
 		return;
 	}
 
+	// Compute the spawn point from the SERVER's copy of this character — never from a
+	// client-supplied transform — so a modified client can't place blocks anywhere.
+	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 150.f + FVector(0.f, 0.f, 50.f);
+	const FRotator SpawnRotation = GetActorRotation();
+
 	if (UWorld* World = GetWorld())
 	{
-		World->SpawnActor<ABuildable>(ABuildable::StaticClass(), Location, Rotation);
+		World->SpawnActor<ABuildable>(ABuildable::StaticClass(), SpawnLocation, SpawnRotation);
 	}
 }
 

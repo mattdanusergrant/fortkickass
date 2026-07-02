@@ -59,9 +59,11 @@ protected:
 	/** Local: build key pressed. Asks the server to place a block in front of the character. */
 	void OnBuildPressed();
 
-	/** Server RPC: the server spawns a replicated Buildable at the requested transform. */
+	/** Server RPC: the server decides where (from its own authoritative copy of this
+	 *  character) and spawns a replicated Buildable. Takes no transform from the client —
+	 *  a modified client can't place blocks anywhere it likes. */
 	UFUNCTION(Server, Reliable)
-	void ServerPlaceBuildable(FVector Location, FRotator Rotation);
+	void ServerPlaceBuildable();
 
 	/** Resources it costs to place one block. Server deducts this from the player's PlayerState. */
 	UPROPERTY(EditDefaultsOnly, Category = "FortKickass|Building")

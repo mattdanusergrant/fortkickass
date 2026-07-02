@@ -70,6 +70,35 @@ With the foundation proven, built the world-concept loop:
   to a dedicated server as long as every server rule stays behind
   `HasAuthority()` — which keeps the eventual dedicated-server migration cheap.
 
+---
+
+## Day 2 — Closing the trust gap
+
+A code audit flagged the one place the prototype broke its own "server decides"
+rule: the build system. Two problems, both about trusting the client:
+
+1. **Building was free.** Pickups incremented a replicated `ResourceCount`, but
+   nothing ever spent it — so the gather loop was decorative and the "survival"
+   slice had no economy.
+2. **The Server RPC trusted the client's transform.** `ServerPlaceBuildable`
+   took a `Location`/`Rotation` *from the client* and spawned there. A modified
+   client could spawn blocks anywhere on the map — the exact cheat vector the
+   whole server-authority architecture exists to prevent.
+
+**The fix (server validates everything):**
+- Added `AFortPlayerState::TrySpendResource(int32)` — server-only; deducts and
+  returns true only if the player can actually afford it. Building now costs
+  `BuildCost` resources, closing the gather → build loop into a real economy.
+- **Removed the client-supplied transform entirely.** The Server RPC now takes
+  no parameters. The server computes the spawn point from *its own* authoritative
+  copy of the character (`GetActorLocation()` + forward vector). The client can
+  ask to build; it can't say where. Nothing the client sends is trusted.
+
+The lesson, made concrete: a Server RPC's *arguments are still client input*.
+Validate or recompute them server-side, exactly like the rest of the state.
+This is the difference between "used a Server RPC" and "used a Server RPC safely."
+
 ### Next
-Wire the Server RPC to a real interact/build UI, credit resources into an
-inventory, and start on a dedicated-server build so the world can persist.
+Rate-limit the build RPC, wire interact/build to Enhanced Input, replicate an
+inventory, derive the day/night clock from a server epoch (cheaper than per-tick
+float replication), and stand up a dedicated-server build so the world persists.
