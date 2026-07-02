@@ -26,6 +26,19 @@ void AFortPlayerState::AddResource(int32 Amount)
 	ShowResourceCount();
 }
 
+bool AFortPlayerState::TrySpendResource(int32 Amount)
+{
+	// Server validates: only spend if the player actually has it.
+	if (!HasAuthority() || ResourceCount < Amount)
+	{
+		return false;
+	}
+
+	ResourceCount -= Amount;
+	ShowResourceCount(); // RepNotify won't fire on the server that changed it.
+	return true;
+}
+
 void AFortPlayerState::OnRep_ResourceCount()
 {
 	// Runs on clients when the server's ResourceCount replicates down.

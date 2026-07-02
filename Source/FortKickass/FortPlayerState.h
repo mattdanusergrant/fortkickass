@@ -20,6 +20,11 @@ public:
 	// Server-only: add to this player's gathered resources. No-op on clients.
 	void AddResource(int32 Amount);
 
+	// Server-only: spend resources if the player has enough. Returns true and deducts
+	// on success, false (no change) if they can't afford it. This is the server
+	// validating the action — the client never gets to spend what it doesn't have.
+	bool TrySpendResource(int32 Amount);
+
 	UFUNCTION(BlueprintPure, Category = "FortKickass|Resources")
 	int32 GetResourceCount() const { return ResourceCount; }
 

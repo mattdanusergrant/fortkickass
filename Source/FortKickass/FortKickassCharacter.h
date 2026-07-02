@@ -63,6 +63,10 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerPlaceBuildable(FVector Location, FRotator Rotation);
 
+	/** Resources it costs to place one block. Server deducts this from the player's PlayerState. */
+	UPROPERTY(EditDefaultsOnly, Category = "FortKickass|Building")
+	int32 BuildCost = 1;
+
 
 protected:
 

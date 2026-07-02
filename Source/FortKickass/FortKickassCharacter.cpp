@@ -2,6 +2,7 @@
 
 #include "FortKickassCharacter.h"
 #include "Buildable.h"
+#include "FortPlayerState.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
@@ -109,7 +110,14 @@ void AFortKickassCharacter::OnBuildPressed()
 
 void AFortKickassCharacter::ServerPlaceBuildable_Implementation(FVector Location, FRotator Rotation)
 {
-	// Server authority: spawn the replicated block so every client sees it.
+	// Server authority: charge the build cost first, and only spawn if the player can afford it.
+	// The server owns the resource count, so a client can't build for free by faking the RPC.
+	AFortPlayerState* PS = GetPlayerState<AFortPlayerState>();
+	if (!PS || !PS->TrySpendResource(BuildCost))
+	{
+		return;
+	}
+
 	if (UWorld* World = GetWorld())
 	{
 		World->SpawnActor<ABuildable>(ABuildable::StaticClass(), Location, Rotation);
